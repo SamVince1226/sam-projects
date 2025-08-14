@@ -54,3 +54,19 @@ print(row_count2)
 # Saving the result as a vector
 countingRows <- c(row_count, row_count2)
 countingRows
+
+# Creating a modified df
+updated_data <- df[,-1]
+updated_data
+
+sampleid_untreated = df2$SampleID[df2$Treatment == "Untreated"]
+sampleid_combo = df2$SampleID[df2$Treatment == "Carbo+LDC204857"]
+
+# Performing T-Tests on df
+df_vector <- vector()
+for(line in 1:nrow(updated_data)){
+  df_vector[line] = t.test(updated_data[line,colnames(updated_data) %in% sampleid_untreated],
+          updated_data[line, colnames(updated_data) %in% sampleid_combo])$p.value
+  
+}
+df_vector
