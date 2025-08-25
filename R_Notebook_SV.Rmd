@@ -1,0 +1,89 @@
+---
+title: "R Notebook: Rushing Internship 2025"
+author: "Samuel Vincent"
+output: html_notebook
+---
+# Basic data frame retreival and analysis:
+## Loading in and retrieving necessary data tables, assigning variables:
+```{r}
+df <- read.csv(".", header = T)
+df2 <- read.csv("./sampleMetadata.csv")
+library(ggplot2)
+df
+df2
+```
+
+## Retrieving and printing column and row names for each dataframe:
+```{r}
+colnames(df)
+rownames(df)
+colnames(df2)
+rownames(df2)
+```
+
+# Creating and modifying a new copy of df2:
+NOTE: Code below creates a new variable for the updated data table, adds a new column to it labelled "SampleID," and fills in all of that column's values as "tissue." 
+```{r}
+updated_metadata = df2
+all.equal(updated_metadata, df2)
+updated_metadata$SampleID
+updated_metadata[,"SampleID"]
+df2[, 'SampleType'] <- 'tissue'
+colnames(updated_metadata)
+```
+
+# Writing out this data table as a tab-delimited text file and as a .csv:
+```{r}
+write.table(updated_metadata, file = "./sampleMetadata_updated.csv", sep = ",", row.names = FALSE, quote = FALSE)
+write.table(updated_metadata, file = "./sampleMetadata_updated.txt", sep = "\t", row.names = FALSE, quote = FALSE)
+```
+
+# Printing out first 5 values for sample S_1 and last 8 for sample S_12:
+```{r}
+Sample1F5 <- head(df[,"S_1"], 5)
+Sample12L8 <- tail(df[,"S_12"], 8)
+print(Sample1F5)
+print(Sample12L8)
+```
+
+# Vector variables
+## Creating a loop that counts rows from each data frame and displays the result:
+```{r}
+row_count <- row_count <- 0
+  for (i in 1:nrow(df)) {row_count <- row_count + 1}
+print(row_count)
+
+row_count2 <- row_count2 <- 0
+for (i in 1:nrow(df2)) {row_count2 <- row_count2 + 1}
+print(row_count2)
+```
+
+## Creating a vector variable:
+```{r}
+countingRows <- c(row_count, row_count2)
+countingRows
+```
+
+# Performing an automated T-test loop:
+## Removing the first data frame's first column to prepare it for T-testing:
+NOTE: This may not be needed for every data frame, only if one/some of a df's rows/columns have non-numerical values.
+NOTE 2: The second portion of this code follows this logic: >vector_variable = df$ColumnFromWhich[df$ThisColumn = "certain value"]. These get saved as individual variables, which will be the ones used in the upcoming T-test loop. 
+```{r}
+updated_data <- df[,-1]
+updated_data
+
+sampleid_untreated = df2$SampleID[df2$Treatment == "Untreated"]
+sampleid_combo = df2$SampleID[df2$Treatment == "Carbo+LDC204857"]
+```
+
+## Performing the T-test loop:
+NOTE: The code block tells the program to read every line from 1 to the last line in updated_data, set [line] as an index, and perform T-tests on the variables listed in the previous code block. Lastly, we display the final variable, df_vector. 
+```{r}
+df_vector <- vector()
+for(line in 1:nrow(updated_data)){
+  df_vector[line] = t.test(updated_data[line,colnames(updated_data) %in% sampleid_untreated],
+          updated_data[line, colnames(updated_data) %in% sampleid_combo])$p.value
+  
+}
+df_vector
+```
