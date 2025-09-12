@@ -1,11 +1,20 @@
 ---
 title: "Overview of Statistical Elements and Tests"
-author: Samuel Vincent
-output: html_notebook
+author: "Samuel Vincent"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
 ---
+# Versions
+* V1: Added general information on statistical elements and tests.
+* V2: Created initial code blocks.
+* V3: Revising code blocks for efficacy
 
 # Preface
 This R Notebook will contain information on various elements and tests used in statistical analyses. These will include t-tests, Wilcoxon tests, ANOVA, linear regressions and correlation tests, as well as elements such as hypotheses and p-values. In addition, I will be covering when it is appropriate to use each test and the assumptions of each one. Finally, I will be covering four types of data visualization methods: histograms, box plots, heat maps and  pie charts. I believe this will be a valuable asset for future statistical analyses on my end.
+
+In addition to a general review of these elements, I will be covering blocks of R code that correspond to each element. This way, I can refer to this notebook in the likely case that I need to run a statistical test in R. These code blocks will come towards the end. 
 
 # The Primary Statistical Tests
 As mentioned before, the primary statistical tests are the t-test, Wilcoxon test, ANOVA, linear regression and correlation tests. These are the tools with which a data analyst will derive meaningful information from raw data.
@@ -200,5 +209,235 @@ Here is an example of one: https://images.squarespace-cdn.com/content/v1/55b6a6d
     + **Slice**: The portion of a whole variable a singular piece of categorical data takes up, visually represented. Its size can also depict frequency something happens in one instance. 
     + **Pie**: The whole variable/population/instance. A typical pie represents **one** of these. Another type of chart would be needed if you were plotting categorical data across an interval. 
     
+# R Code Blocks: Statistical Tests
+Now that we've covered all of the general information, we can integrate this knowledge into our R code. These chunks will be displayed in distinguishable code blocks. Keep in mind that the first published version of this notebook doesn't have this section. 
+
+## T-Tests
+There are three types of T-Tests you can perform in R: One-sample, two-sample and paired. For the one-sample t-test, we include a known value (in this case, 3.5), making this code expressed as:
+```{r}
+data <- c(1,2,3,4,5)
+t.test(data, mu = 3.5)
+```
+
+For a two-sample t-test, we could write something like this. In this instance, we assume the variances between the two groups to be equal, indicated by the argument "var.equal = TRUE". We use this type of t-test to compare two **independent** groups:
+```{r}
+group_one <- c(1,3,5,7,9)
+group_two <- c('A','B','C','D','E')
+group_three <- c(0,2,4,6,8)
+t.test(group_one, group_three, var.equal = TRUE)
+```
+
+And finally, for a paired t-test, we can write something along the lines of this. Unlike the previous type, this is used to compare two **related** groups:
+```{r}
+group_before <- c(1,3,5,7,9)
+group_after <- c(7,23,78,12,7)
+t.test(group_before, group_after, paired = TRUE)
+```
+
+## Wilcoxon Tests
+Similarly to the t-tests, Wilcoxon tests come in three flavors for the sake of R: Signed-rank tests, rank-sum tests and one-sample tests. Signed-rank tests are used typically to compare data of two **related** samples. This could be expressed as:
+```{r}
+group_before <- c(1,3,5,7,9)
+group_after <- c(0,2,4,6,8)
+wilcox.test(group_before, group_after, paired = TRUE)
+```
+
+Rank-sum tests are used to compare two **independent** samples of data. In this case, such a test could be written like:
+```{r}
+group_one <- c(1,3,5,7,9)
+group_two <- c(4,8,45,21,92,12)
+wilcox.test(group_one, group_two, paired = FALSE)
+# Keep in mind that the only difference between the sign-rank and rank-sum tests are whether you mark the "paired" argument as TRUE or FALSE.
+```
+
+Lastly, we use one-sample test to determine whether the median of one sample deviates from a known value (in this case, 3.2):
+```{r}
+sample <- c(1,2,3,4,5,11,24,31)
+wilcox.test(sample, mu = 3.2)
+```
+
+## ANOVA Tests
+There are two types of ANOVA tests we can perform in R: one-way and two-way. We use the former whenever we have one **categorical, independent** variable and one **continuous, dependent** variable:
+```{r}
+# rnorm stays the same, while the means from each group can differ.
+data <- data.frame(
+  group = rep(c('A', 'B', 'C'), each = 10),
+  value = c(rnorm(10, mean = 2), rnorm(10, mean = 5), rnorm(10, mean = 8))
+)
+
+anova_result <- aov(value ~ group, data = data)
+anova_result
+```
+
+For the two-way ANOVA, this is used whenever there are **two** categorical, independent variables. This can be written out as:
+```{r}
+data <- data.frame(
+  group1 = rep(c("A", "B"), each = 5),
+  group2 = rep(c("Y", "Z"), times = 5),
+  value = c(rnorm(5, mean = 5), rnorm(5, mean = 4.5), rnorm(5, mean = 3), rnorm(5, mean = 2.5))
+)
+
+anova_result_2way <- aov(value ~ group1 * group2, data = data)
+anova_result_2way
+# The only difference between the two types is whether you set your value up with only one group, or two. 
+```
+
+## Linear Regressions
+Compared with the last three tests, linear regressions are simple to perform in R. We will use a base data set, "mtcars" for the purpose of this exercise. Keep in mind that there are multiple steps, however; We can write an instance of this out as:
+```{r}
+# Load in and inspect your data and related packages
+library(ggplot2)
+data(mtcars)
+head(mtcars)
+summary(mtcars)
+
+# Perform the linear regression
+# Format: model <- lm(dep_variable ~ indep_variable, data = df)
+model <- lm(mpg ~ wt, data = mtcars)
+```
+Note how, upon executing this code, the console gives us a 5-number summary for each column in the mtcars data frame, as well as the linear regression's visual expression.
+
+Next, we can visualize this model with the following code:
+```{r}
+plot(mtcars$wt, mtcars$mpg)
+abline(model, col = "blue")
+# You can use any color you like! It just needs to be in-between quotation marks, following the "col" argument.
+
+# If you're performing a multiple regression test, you can try a diagnostic plot, which looks like...
+par(mfrow = c(2, 2))
+plot(model)
+```
+
+Finally, we can use this test to predict new values with the help of the predict() function. We can achieve this through writing the following code. As you can see by the result, the predicted miles per gallon would be 10.56.
+```{r}
+new_data <- data.frame(wt = 5.0)  # We're using an example weight of 5k pounds, hence the 5.0
+mpg_predictions <- predict(model, newdata = new_data)
+mpg_predictions
+```
+
+## Correlation Tests
+There are three methods we can use when performing correlation tests in R: 'pearson', 'spearman' and 'kendall'. We use the pearson method when we're dealing with **linear relationships** between target variables, the spearman method when we're dealing with **monotonic^[Both variables have the same direction, but rates of change may differ.]** relationships, and the kendall method for **ordinal data^[Any data that has a natural, ordered sequence.]** . We can write these out as:
+```{r}
+# The pearson method
+x <- c(1,2,3,4,5)
+y <- c(0,2,4,6,8)
+p_result <- cor.test(x, y, method = "pearson")
+
+# The spearman method
+x <- c(1,2,3,4,5)
+y <- c(0,2,4,6,8)
+s_result <- cor.test(x, y, method = "spearman")
+
+# The kendall method
+x <- c(1,2,3,4,5)
+y <- c(0,2,4,6,8)
+k_result <- cor.test(x, y, method = "kendall")
+
+# Displaying a given result
+p_result
+```
+
+# R Code Blocks: Hypotheses & P-Values
+We can set up logical systems to facilitate the integration of these elements in R. We can try out a way to do this with both of them in one code block, since they can only exist in the context of each other. Now, let's try this setup with some data from the mtcars data frame. We can use data from the mpg column for this:
+```{r}
+# Loading in and inspecting the data 
+update.packages(ask = FALSE)
+install.packages("plotrix")
+library(plotrix)
+data <- data(mtcars)
+summary(mtcars)
+
+# Now we know that the population mean of the cars' mpgs equals 20.09; However, we also need a sample mean for this model to work. To this end, let's take a sample of the mpg values belonging to the first 3 cars in the list. 
+population_mean_cars <- 20.09
+sample_mean_cars <- ((21.0 + 21.0 + 22.8)/3)
+
+# We also need standard error, which needs a standard deviation value. We can calculate these values by the following code and by using the neat plotrix package installed at the start:
+mpg_column <- mtcars$mpg
+mpg_column
+
+se_mpg <- std.error(mpg_column)
+
+# Finally, we can determine the z-score and p-value:
+z_score_mpg <- (sample_mean_cars - population_mean_cars) / se_mpg
+p_value_mpg <- 2 * pnorm(-abs(z_score))
+
+# Setting up the logical system:
+if(p_value <= 0.05) {
+  result_mpg <- print("The results indicate rejection of the Null Hypothesis!")
+} else if(p_value > 0.05) {
+  result_mpg <- print("The results indicate acceptance of the Null Hypothesis!")
+}
+result_mpg
+```
+
+Keep in mind that this is only one of many ways you can setup a logical system to help you make your final decision. This was just one of the more basic ways. You can plug in just about any test you want in the first portion of the code block, and go from there.
+
+# R Code Blocks: Visualizing Data
+Lastly, we will cover how to create visual plots in R. Refer to the general information section regarding these plots if you need help understanding certain related concepts within the code blocks.
+
+## Histograms
+We can code for a histogram by using the **hist()** function and inserting placeholder data: 
+```{r}
+# Format: hist(df, main = histogram_title, xlab = "x_axis_label", col = "column_color", border = "border_color")
+data <- c(1,2,3,4,5,10,20,30,50,100)
+
+hist(data, main = "Hystogram", xlab = "Values", col = "lightgrey", border = "black")
+```
+
+## Box Plots
+We can code for a box plot with the **boxplot()** function and writing something along these lines:
+```{r}
+# Format: boxplot(df, main = "boxplot_title", ylab = "y_axis_label", col = "column_color")
+data <- c(1,2,3,4,5,10,20,30,50,100)
+
+boxplot(data, main = "Basic Box Plot", ylab = "Values", col = "lightgreen")
+```
+
+For multiple groups of data, we can do something like this:
+```{r}
+group1 <- c(1,3,5,7,9)
+group2 <- c(0,2,4,6,8)
+
+data_list <- list(Group1 = group1, Group2 = group2)
+
+boxplot(data_list, main = "Multi-Group Box Plot", ylab = "Values", col = c("lightblue", "pink"))
+```
+
+## Heat Maps
+Heat maps can be coded for in R using the **heatmap()** function, and by writing the following:
+```{r}
+# Format: heatmap(df, main = "heatmap_title", col = heat.colors(n))
+data <- matrix(rnorm(100), nrow = 10)
+
+heatmap(data, main = "Base R Heatmap", col = heat.colors(10))
+```
+
+The **ggplot2** package, if installed, can be used to create plots with more customization options, including heat maps, with the use of the **ggplot()** function. 
+
+These are just placeholder values; You can plug any number/color you need to properly display your data.
+```{r}
+library(ggplot2)
+
+data <- expand.grid(X = 1:10, Y = 1:10)
+data$Value <- rnorm(100)
+
+ggplot(data, aes(x = X, y = Y, fill = Value)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient(low = "lightgrey", high = "blue") +
+  labs(title = "The Better Heatmap") +
+  theme_minimal()
+```
+
+## Pie Charts
+Unsurprisingly, there is a dedicated function in Base R for the creation of pie charts: **pie()**. Here's how you could create one:
+```{r}
+# Format: pie(slices_list, labels = labels_list, main = "pie_chart_title", col = "column_color")
+# column_color can be a gradient, based on the slices' length. This is indicated by the modified argument "gradient_color(length(slices))"
+slices <- c(1,5,10,30,15,7.5)
+labels <- c("Category A", "Category B", "Category C", "Category D")
+
+pie(slices, labels = labels, main = "Life of Pie", col = rainbow(length(slices)))
+```
+
 # Conclusion
-There is a variety of ways in which a statistician can gather and process data to prove a point. Each test has a rich history of use, with their creators working tirelessly to finalize their methods. There are equally as many ways to visualize this data as there are methods to process it as well, each with unique conditions for use. I hope this article was illuminating for you; I will also be keeping this handy for future reference. 
+And there you have it! There are a variety of ways in which a statistician can gather and process data to prove a point. Each test has a rich history of use, with their creators working tirelessly to finalize their methods. There are equally as many ways to visualize this data as there are methods to process it as well, each with unique conditions for use. I hope this notebook was illuminating for you; I will also be keeping this handy for future reference. 
