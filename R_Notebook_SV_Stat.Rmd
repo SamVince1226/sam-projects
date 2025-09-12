@@ -13,16 +13,24 @@ output:
 -   V2: Created initial code blocks.
 -   V3: Revising code blocks for efficacy.
 -   V4: Combined general information and code blocks into the same section.
+    -   V4.1: Added some more text for the preface and end material, as well as a new "Useful Packages in R" section in the preface.
 
 # Preface
 
 This R Notebook will contain information on various elements and tests used in statistical analyses. These will include t-tests, Wilcoxon tests, ANOVA, linear regressions and correlation tests, as well as elements such as hypotheses and p-values. In addition, I will be covering when it is appropriate to use each test and the assumptions of each one. Finally, I will be covering four types of data visualization methods: histograms, box plots, heat maps and pie charts. I believe this will be a valuable asset for future statistical analyses on my end.
 
-In addition to a general review of these elements, I will be covering blocks of R code that correspond to each element. This way, I can refer to this notebook in the likely case that I need to run a statistical test in R. These will come at the end of each test's section.
+In addition to a general review of these elements, I will be covering blocks of R code that correspond to each element. This way, I can refer to this notebook in the likely case that I need to run a statistical test in R. These will come at the end of each test's and data visualizsation's section.
+
+## Useful Packages in R
+
+Base R is very helpful on its own for gathering and analyzing data, but sometimes we prefer to quicken the process by installing some external R code, known as **packages**. Two of the more prominent ones we like to use include:
+
+-   **ggplot2**: Used primarily to enhance data visualization with extra customization options.
+-   **plotrix**: Used for increasing R's range of statistical functions, saving extra time.
 
 # The Primary Statistical Tests
 
-As mentioned before, the primary statistical tests are the t-test, Wilcoxon test, ANOVA, linear regression and correlation tests. These are the tools with which a data analyst will derive meaningful information from raw data.
+As mentioned before, the primary statistical tests are the t-test, Wilcoxon test, ANOVA, linear regression and correlation tests. These are the tools with which a data analyst will derive meaningful information from raw data. Statisticians can use these tests to gather vital information in order to piece graphs and results together.
 
 ## T-tests
 
@@ -554,6 +562,10 @@ labels <- c("Category A", "Category B", "Category C", "Category D")
 pie(slices, labels = labels, main = "Life of Pie", col = rainbow(length(slices)))
 ```
 
+In this instance, the pie chart will have differently-colored slices, the number of colors corresponding to the number of slices. This was indicated by the "col = rainbow(length(slices))" argument within the function.
+
 # Conclusion
 
 And there you have it! There are a variety of ways in which a statistician can gather and process data to prove a point. Each test has a rich history of use, with their creators working tirelessly to finalize their methods. There are equally as many ways to visualize this data as there are methods to process it as well, each with unique conditions for use. I hope this notebook was illuminating for you; I will also be keeping this handy for future reference.
+
+While base R has plenty of methods by which we can organize and evaluate raw data, it can be helpful to go ahead and install some packages, such as ggplot2 and plotrix. This way, we aren't spending as much time creating a formula for a specific statistical test from scratch.
