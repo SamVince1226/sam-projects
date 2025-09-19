@@ -1,0 +1,147 @@
+---
+title: "R Exercises"
+author: "Sam Vincent"
+date: "2025-09-19"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+# R Exercises
+
+This will be used for recording various code blocks in R Studio.
+
+## 1. Steps
+
+This exercise contains code for calculating and manipulating pedometer data, using logical vectors.
+
+```{r}
+# Retrieving data and assigning it to variables
+steps <- c(106, 0, 12775, 8287, 9222, 7080, 6055) 
+kcal <- c(1356, 1341, 2109, 1882, 1970, 1938, 1851)
+
+# Creating further calculations and assigning them to variables
+daily_steps <- steps / 24
+daily_energy <- kcal / daily_steps
+hourly_steps <- daily_steps / 24
+
+# Calculating total hourly steps and displaying the result
+tot_hourly_steps <- sum(hourly_steps)
+tot_hourly_steps
+```
+
+How to access specific values within this vector:
+
+```{r}
+steps[1] # Selecting one value
+steps[1:5] # Selecting a range of values
+steps[c(1,3,5)] # Selecting a non-continuous range of values
+```
+
+Introducing logic into our vectors:
+
+```{r}
+steps > 1500 # Are there more than 1500 steps?
+steps < 1500 # Are there less than 1500 steps?
+
+steps >= 1500 # Are there at least 1500 steps?
+steps <= 1500 # Are there at most 1500 steps?
+
+steps == 1500 # Are there exactly 1500 steps?
+steps != 1500 # Are there any instances where there aren't 1500 steps?
+```
+
+Introducing advanced logic into our vectors:
+
+```{r}
+steps > 1000 & kcal < 2100 # When were more than 1000 steps taken AND less than 2100 kcals were burned?
+steps <= 1200 | kcal != 1980 # When were at most 1200 steps taken OR anything other than 1980 kcals were burned?
+```
+
+Using logic to subset data:
+
+```{r}
+grand_steps <- steps > 1000 # Identifies days where steps > 1000
+grand_kcal <- kcal[grand_steps] # Takes these days and extracts the corresponding kcal values
+
+mean(grand_kcal) # Calculates the mean of all kcal values where steps > 1000
+```
+
+### Practice
+
+Attempting to recalculate the mean energy consumption per step using only that part of the data that exceeded the BMR.
+
+```{r}
+# Reintroducing data
+steps <- c(106, 0, 12775, 8287, 9222, 7080, 6055) 
+kcal <- c(1356, 1341, 2109, 1882, 1970, 1938, 1851)
+
+# Determining BMR
+step0 <- steps == 0
+BMR <- kcal[step0]
+BMR
+
+# Subtracting BMR value from kcal values
+above_BMR <- (kcal - BMR)
+above_BMR
+
+# Calculating energy consumption per step
+kcal_perstep <- (steps / kcal)
+kcal_perstep
+```
+
+# T-tests & Wilcox on Existing Data
+
+Using actual data for performing T and Wilcox tests
+
+```{r}
+# Initial data retrieval
+library(dplyr)
+df_SD <- read.csv("Q:/sampleData.csv")
+df_SMD <- read.csv("Q:/sampleMetadata.csv")
+
+# Data modification and display
+df_SD
+df_SMD
+```
+
+## Performing the T-tests
+
+```{r}
+# Assigning correponding values to vector variables
+sampleid_untreated = df_SMD$SampleID[df_SMD$Treatment == "Untreated"]
+sampleid_carbo = df_SMD$SampleID[df_SMD$Treatment == "Carboplatin 50mg/kg"]
+
+# Removing the first column from df_SD
+updated_data <- df_SD[,-1]
+updated_data
+
+# Performing T-Tests on each row of df_SD
+ttest_results <- vector()
+for(line in 1:nrow(updated_data)){
+  ttest_results[line] = t.test(updated_data[line,colnames(updated_data) %in% sampleid_untreated],
+          updated_data[line, colnames(updated_data) %in% sampleid_carbo])$p.value
+  
+}
+ttest_results
+```
+
+## Performing the Wilcox Tests
+```{r}
+# Performing a wilcox test on all rows of df_SD
+wilcox_results <- vector()
+for(line in 1:nrow(updated_data)){
+  wilcox_results[line] = wilcox.test(as.numeric(updated_data[line,colnames(updated_data) %in% sampleid_untreated]),
+          as.numeric(updated_data[line, colnames(updated_data) %in% sampleid_carbo]))$p.value
+  
+}
+wilcox_results
+```
+
+## Creating histograms based off the data
+```{r}
+hist(ttest_results, main = "T-Test P-Value Distribution Between\nUntreated and Carboplatin (50mg/kg) Mice", xlab = "P-Values", col = "lightblue", border = "black")
+hist(wilcox_results, main = "Wilcox P-Vlaue Distribution Between\nUntreated and Carboplatin (50mg/kg) Mice", xlab = "P-Values", col = "lightgreen", border = "black")
+```
+
+
