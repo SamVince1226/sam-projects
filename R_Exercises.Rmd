@@ -95,20 +95,18 @@ kcal_perstep
 Using actual data for performing T and Wilcox tests
 
 ```{r}
-# Initial data retrieval
+# Initial data retrieval and display
 library(dplyr)
 df_SD <- read.csv("Q:/sampleData.csv")
 df_SMD <- read.csv("Q:/sampleMetadata.csv")
-
-# Data modification and display
 df_SD
 df_SMD
 ```
 
 ## Performing the T-tests
-
+Format: category1 <- df$column_where[df$the_other_column_equals == "this_category"]
 ```{r}
-# Assigning correponding values to vector variables
+# Assigning corresponding values to vector variables
 sampleid_untreated = df_SMD$SampleID[df_SMD$Treatment == "Untreated"]
 sampleid_carbo = df_SMD$SampleID[df_SMD$Treatment == "Carboplatin 50mg/kg"]
 
