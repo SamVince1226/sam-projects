@@ -104,7 +104,9 @@ df_SMD
 ```
 
 ## Performing the T-tests
-Format: category1 <- df$column_where[df$the_other_column_equals == "this_category"]
+
+Format: category1 \<- df$column_where[df$the_other_column_equals == "this_category"]
+
 ```{r}
 # Assigning corresponding values to vector variables
 sampleid_untreated = df_SMD$SampleID[df_SMD$Treatment == "Untreated"]
@@ -125,6 +127,7 @@ ttest_results
 ```
 
 ## Performing the Wilcox Tests
+
 ```{r}
 # Performing a wilcox test on all rows of df_SD
 wilcox_results <- vector()
@@ -137,9 +140,59 @@ wilcox_results
 ```
 
 ## Creating histograms based off the data
+
 ```{r}
 hist(ttest_results, main = "T-Test P-Value Distribution Between\nUntreated and Carboplatin (50mg/kg) Mice", xlab = "P-Values", col = "lightblue", border = "black")
 hist(wilcox_results, main = "Wilcox P-Vlaue Distribution Between\nUntreated and Carboplatin (50mg/kg) Mice", xlab = "P-Values", col = "lightgreen", border = "black")
 ```
 
+## Creating a volcano plot based off the data
 
+### Getting necessary data processed
+
+First, we obtain our groups' mean values. The groups we grab these values from are in "untreated" (S_1, S_2, and S_3) and "carboplatin 50mg/kg" (S_4, S_5, and S_6). This makes two sets of 23 means, creating 46 numbers in total. In this instance, we tried doing this in 2 ways: Hard-coding and looping.
+
+-   Hard-coding: Strictly identifies which columns to take values from. We use the rowMeans() function, followed by specifying which data frame to take the numbers from. We then specify that we want to take the numbers from a list of columns in that data frame. This is done for each treatment group.
+-   Looping: Enables a for-loop to count each row of the data frame, extract values from each set of columns identified as either "untreated" or "carboplatin 50mg/kg," and perform the mean() function on each rows' set of numbers. At the same time, we assign the means from each group to a variable, which will be used for the ratio list.
+
+```{r}
+# Determining untreated/carboplatin groups' means (option 1)
+untreated_means <- rowMeans(updated_data[, c("S_1", "S_2", "S_3")])
+carbo_means <- rowMeans(updated_data[, c("S_4", "S_5", "S_6")])
+
+untreated_means
+carbo_means
+
+# Determining the mean ratios
+mean_ratios <- carbo_means/untreated_means
+mean_ratios
+
+# Determining untreated/carboplatin groups' means (option 2)
+loop_results_fc <- vector()
+for(line in 1:nrow(updated_data)){
+                       
+    average_g1 = mean(as.numeric(updated_data[line,colnames(updated_data) %in% sampleid_untreated]))
+    average_g2 = mean(as.numeric(updated_data[line,colnames(updated_data) %in% sampleid_carbo]))
+  
+  loop_results_fc[line] = average_g2/average_g1
+
+}
+loop_results_fc
+
+all.equal(loop_results_fc, mean_ratios) # true
+
+```
+
+Once we obtained the 46 values, we determined the ratio between each set of 23 values by dividing the mean set of the carboplatin group by the set of the untreated one. This yields a list of 23 ratio numbers, no matter which way it's done. \### Creating the plot
+
+From here, we assemble a volcano plot. Keep in mind that for this to work, the x-axis needs to be the log2 of the ratios and the y-axis needs to be the -log10 of a list of p-values (we chose the p-value list from our t-test for this instance). From here, all that needs to be done is plug these new variables into the plot() function, along with specifying the plot and label titles.
+
+```{r}
+p_values_log10 <- -log10(ttest_results)
+mean_ratios_log2 <- log2(mean_ratios)
+
+plot(mean_ratios_log2, p_values_log10, main = "Log10 of P-Values vs. Log2 of Mean Ratios\nfrom sampleData.csv", xlab = "Log2 of Mean Ratios", ylab = "Log10 of P-Values (T-Test)")
+
+```
+
+Normally, volcano plots are used for massive amounts of data, so the one produced from this code block doesn't seem much like a typical one, but it is!
